@@ -14,7 +14,7 @@ public class Player extends GameEntity {
         // MODIFIKASI: Panggil super() HANYA dengan parameter animasi IDLE
         // Ini adalah 8 argumen yang diharapkan oleh konstruktor GameEntity
         super(200, 10, // maxHealth, attackPower
-            basePath + "Idle.png", 10, 1, 0.125f, // idleSpriteSheetPath, idleFrameCols, idleFrameRows, idleFrameDuration
+            basePath + "Idle.png", 10, 1, 0.085f, // idleSpriteSheetPath, idleFrameCols, idleFrameRows, idleFrameDuration
             500, 500); // displayWidth, displayHeight
 
         this.score = 0;
@@ -24,6 +24,7 @@ public class Player extends GameEntity {
         // Ini adalah tempat 8 argumen tambahan Anda sebelumnya akan digunakan
         setAttackAnimation(basePath + "Attack.png", 7, 1, 0.1f);
         setHitAnimation(basePath + "Hit.png", 3, 1, 0.15f);
+        setDyingAnimation(basePath + "Death.png",11,1,0.15f);
 
         System.out.println("Player created!");
     }

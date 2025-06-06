@@ -40,6 +40,7 @@ public abstract class GameEntity implements Attackable, Renderable {
     protected Texture idleSpriteSheet; // Texture untuk sprite sheet idle
     protected Texture attackSpriteSheet; // Texture untuk sprite sheet attack
     protected Texture hitSpriteSheet; // Texture untuk sprite sheet hit
+    protected Texture dyingSpriteSheet;
     protected CharacterState currentState;
 
 
@@ -112,6 +113,23 @@ public abstract class GameEntity implements Attackable, Renderable {
     // Metode abstrak yang harus diimplementasikan oleh sub-kelas
     public abstract void attack(GameEntity target);
 
+    // --- BARU: setDyingAnimation() ---
+    public void setDyingAnimation(String dyingSpriteSheetPath, int dyingFrameCols, int dyingFrameRows, float dyingFrameDuration) {
+        if (this.dyingSpriteSheet != null) this.dyingSpriteSheet.dispose();
+        this.dyingSpriteSheet = new Texture(dyingSpriteSheetPath);
+        TextureRegion[][] tmpDying = TextureRegion.split(this.dyingSpriteSheet,
+            this.dyingSpriteSheet.getWidth() / dyingFrameCols,
+            this.dyingSpriteSheet.getHeight() / dyingFrameRows);
+        Array<TextureRegion> dyingFrames = new Array<TextureRegion>(TextureRegion.class);
+        for (int i = 0; i < dyingFrameRows; i++) {
+            for (int j = 0; j < dyingFrameCols; j++) {
+                dyingFrames.add(tmpDying[i][j]);
+            }
+        }
+        dyingAnimation = new Animation<TextureRegion>(dyingFrameDuration, dyingFrames);
+    }
+    // --- AKHIR BARU ---
+
     public void setAttackAnimation(String attackSpriteSheetPath, int attackFrameCols, int attackFrameRows, float attackFrameDuration) {
         if (this.attackSpriteSheet != null) this.attackSpriteSheet.dispose(); // Dispose jika sudah ada
         this.attackSpriteSheet = new Texture(attackSpriteSheetPath);
@@ -125,6 +143,14 @@ public abstract class GameEntity implements Attackable, Renderable {
             }
         }
         attackAnimation = new Animation<TextureRegion>(attackFrameDuration, attackFrames);
+    }
+
+    public Animation<TextureRegion> getCurrentPlayingAnimation() {
+        return currentPlayingAnimation;
+    }
+
+    public float getStateTime() {
+        return stateTime;
     }
 
     public void setHitAnimation(String hitSpriteSheetPath, int hitFrameCols, int hitFrameRows, float hitFrameDuration) {
@@ -144,10 +170,10 @@ public abstract class GameEntity implements Attackable, Renderable {
 
     // Implementasi dari Renderable
     public void setState(CharacterState newState) {
-        if (this.currentState == newState) return; // Tidak perlu ganti jika state sama
+        if (this.currentState == newState) return;
 
         this.currentState = newState;
-        this.stateTime = 0f; // Reset waktu animasi saat state berubah
+        this.stateTime = 0f;
 
         switch (newState) {
             case IDLE:
@@ -157,21 +183,22 @@ public abstract class GameEntity implements Attackable, Renderable {
                 if (attackAnimation != null) {
                     currentPlayingAnimation = attackAnimation;
                 } else {
-                    currentPlayingAnimation = idleAnimation; // Fallback jika tidak ada animasi attack
+                    currentPlayingAnimation = idleAnimation;
                 }
                 break;
             case HIT:
                 if (hitAnimation != null) {
                     currentPlayingAnimation = hitAnimation;
                 } else {
-                    currentPlayingAnimation = idleAnimation; // Fallback jika tidak ada animasi hit
+                    currentPlayingAnimation = idleAnimation;
                 }
                 break;
-            case DYING: // Jika Anda menambahkan animasi mati
-                // currentPlayingAnimation = dyingAnimation;
-                // stateTime = 0f; // Biasanya tidak looping
-                // Jika tidak ada animasi dying, bisa kembali ke idle atau frame terakhir hit
-                currentPlayingAnimation = idleAnimation; // Fallback
+            case DYING: // BARU: Handle state DYING
+                if (dyingAnimation != null) {
+                    currentPlayingAnimation = dyingAnimation;
+                } else {
+                    currentPlayingAnimation = idleAnimation; // Fallback
+                }
                 break;
         }
     }
@@ -185,6 +212,10 @@ public abstract class GameEntity implements Attackable, Renderable {
     public void render(SpriteBatch batch, float x, float y) {
         this.x = x;
         this.y = y;
+
+        if (currentState == CharacterState.DYING && currentPlayingAnimation.isAnimationFinished(stateTime)) {
+            return;
+        }
 
         // currentPlayingAnimation tidak boleh null. Jika null, akan error.
         // Pastikan animasi idle selalu diinisialisasi di konstruktor.
@@ -200,15 +231,15 @@ public abstract class GameEntity implements Attackable, Renderable {
     }
 
 
+ // MODIFIKASI: update() agar DYING tidak otomatis kembali ke IDLE
     public void update(float delta) {
-        stateTime += delta; // Update waktu animasi
+        stateTime += delta;
 
-        // --- BARU: Otomatis kembali ke IDLE setelah animasi satu kali selesai ---
-        if ((currentState == CharacterState.ATTACKING && currentPlayingAnimation.isAnimationFinished(stateTime)) ||
-            (currentState == CharacterState.HIT && currentPlayingAnimation.isAnimationFinished(stateTime))) {
-            setState(CharacterState.IDLE); // Kembali ke idle setelah animasi selesai
+        // Otomatis kembali ke IDLE setelah animasi satu kali selesai, kecuali jika DYING
+        if (currentState != CharacterState.IDLE && currentState != CharacterState.DYING &&
+            currentPlayingAnimation.isAnimationFinished(stateTime)) {
+            setState(CharacterState.IDLE);
         }
-        // --- AKHIR BARU ---
 
         updateEffects(delta);
     }

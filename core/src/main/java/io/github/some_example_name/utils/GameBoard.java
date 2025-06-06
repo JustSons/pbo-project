@@ -15,7 +15,8 @@ import io.github.some_example_name.effects.tile.BonusDamageEffect;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.HashSet; // Tambahkan import HashSet
+import java.util.HashSet;
+import java.util.Collections; // Tambahkan import Collections
 
 public class GameBoard {
     public Tile[][] tileGrid;
@@ -46,20 +47,24 @@ public class GameBoard {
         boolean validBoardFound = false;
         long startTime = System.currentTimeMillis();
         int attempts = 0;
+        final int MIN_REQUIRED_WORDS = 3; // Minimal 3 kata yang bisa dibentuk
+        final int MAX_ATTEMPTS = 500; // Batas percobaan untuk menghindari loop tak terbatas
 
-        while (!validBoardFound && attempts < 100) {
+        while (!validBoardFound && attempts < MAX_ATTEMPTS) {
             fillBoardWithRandomTiles();
-            // Cek apakah ada kata valid. Jika Anda mau, Anda bisa memanggil `findAllValidWords` di sini
-            // dan cek apakah list-nya tidak kosong.
-            if (hasAtLeastOneValidWord()) {
+            List<String> solutions = findAllValidWords(); // Mencari semua kata di papan
+            if (solutions.size() >= MIN_REQUIRED_WORDS) { // Cek jika jumlah kata mencukupi
                 validBoardFound = true;
+                Collections.sort(solutions); // Urutkan solusi untuk tampilan lebih baik
+                // Tampilkan solusi kata di terminal
+                Gdx.app.log("GameBoard", "Generated board with " + solutions.size() + " valid words (first 10): " + solutions.subList(0, Math.min(solutions.size(), 10)));
             }
             attempts++;
         }
 
         if (!validBoardFound) {
-            Gdx.app.error("GameBoard", "Failed to generate a board with at least one valid word after " + attempts + " attempts. Proceeding with potentially invalid board.");
-            fillBoardWithRandomTiles();
+            Gdx.app.error("GameBoard", "Failed to generate a board with at least " + MIN_REQUIRED_WORDS + " valid words after " + attempts + " attempts. Proceeding with potentially invalid board.");
+            fillBoardWithRandomTiles(); // Tetap isi papan meskipun validasi gagal
         }
         long endTime = System.currentTimeMillis();
         Gdx.app.log("GameBoard", "Board generation took " + (endTime - startTime) + " ms in " + attempts + " attempts.");
@@ -68,8 +73,10 @@ public class GameBoard {
     private void fillBoardWithRandomTiles() {
         for (int r = 0; r < gridRows; r++) {
             for (int c = 0; c < gridCols; c++) {
+                // Pastikan tile lama di-dispose sebelum diganti dengan yang baru
                 if (tileGrid[r][c] != null) {
                     tileGrid[r][c].dispose();
+                    tileGrid[r][c] = null; // Set to null after disposing
                 }
 
                 char randomLetter = WordDictionary.getRandomCommonLetter().charAt(0);
@@ -77,109 +84,69 @@ public class GameBoard {
                 float tileY = gridStartY + r * tileSize;
 
                 float chance = MathUtils.random.nextFloat();
-                if (chance < 0.05f) {
+                if (chance < 0.05f) { // 5% GemTile
                     tileGrid[r][c] = new GemTile(randomLetter, "Red", 2, tileX, tileY, tileSize, tileSize);
-                } else if (chance < 0.10f) {
+                } else if (chance < 0.15f) { // 10% FireTile (0.05 + 0.10)
                     tileGrid[r][c] = new FireTile(randomLetter, tileX, tileY, tileSize, tileSize);
                     ((FireTile) tileGrid[r][c]).addEffect(new BonusDamageEffect(5));
-                } else {
+                } else { // Sisanya BasicLetterTile
                     tileGrid[r][c] = new BasicLetterTile(randomLetter, tileX, tileY, tileSize, tileSize);
                 }
             }
         }
     }
 
-    // Metode ini digunakan untuk memastikan minimal ada satu kata (seperti sebelumnya)
-    public boolean hasAtLeastOneValidWord() {
+    // HAPUS metode ini karena tidak lagi diperlukan, kita menggunakan findAllValidWords()
+    // public boolean hasAtLeastOneValidWord() { ... }
+    // private boolean findWordFromTileForValidation(...) { ... }
+
+    public List<String> findAllValidWords() {
+        HashSet<String> foundWords = new HashSet<>();
         boolean[][] visited;
+
         for (int r = 0; r < gridRows; r++) {
             for (int c = 0; c < gridCols; c++) {
                 visited = new boolean[gridRows][gridCols];
-                if (findWordFromTileForValidation(r, c, "", visited)) { // Ganti nama metode untuk menghindari kebingungan
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean findWordFromTileForValidation(int r, int c, String currentWord, boolean[][] visited) {
-        if (r < 0 || r >= gridRows || c < 0 || c >= gridCols || visited[r][c]) {
-            return false;
-        }
-
-        char letter = tileGrid[r][c].getLetter();
-        String nextWord = currentWord + letter;
-
-        if (!WordDictionary.isPrefix(nextWord)) {
-            return false;
-        }
-
-        visited[r][c] = true;
-
-        // Cek validitas kata hanya jika panjangnya minimal 3 (sesuai logika game Anda)
-        if (nextWord.length() >= 3 && WordDictionary.isValidWord(nextWord)) {
-            visited[r][c] = false; // Backtrack
-            return true;
-        }
-
-        for (int i = 0; i < 8; i++) {
-            if (findWordFromTileForValidation(r + DR[i], c + DC[i], nextWord, visited)) {
-                visited[r][c] = false; // Backtrack
-                return true;
-            }
-        }
-
-        visited[r][c] = false; // Backtrack
-        return false;
-    }
-
-    // --- METODE BARU UNTUK MENCARI SEMUA KATA ---
-    public List<String> findAllValidWords() {
-        HashSet<String> foundWords = new HashSet<>(); // Gunakan HashSet untuk menghindari duplikat
-        boolean[][] visited;
-
-        for (int r = 0; r < gridRows; r++) {
-            for (int c = 0; c < gridCols; c++) {
-                visited = new boolean[gridRows][gridCols]; // Reset visited untuk setiap titik awal
                 findWordsFromTile(r, c, "", visited, foundWords);
             }
         }
         List<String> result = new ArrayList<>(foundWords);
-        Gdx.app.log("GameBoard", "Found " + result.size() + " valid words on the board.");
+        // Gdx.app.log("GameBoard", "Found " + result.size() + " valid words on the board."); // Logging ini pindah ke initializeAndValidateBoard
         return result;
     }
 
     private void findWordsFromTile(int r, int c, String currentWord, boolean[][] visited, HashSet<String> foundWords) {
         if (r < 0 || r >= gridRows || c < 0 || c >= gridCols || visited[r][c]) {
-            return; // Berhenti jika di luar batas atau sudah dikunjungi
+            return;
         }
 
         char letter = tileGrid[r][c].getLetter();
         String nextWord = currentWord + letter;
 
-        // Pruning: jika nextWord bukan prefiks dari kata apapun di kamus, berhenti jelajah jalur ini
         if (!WordDictionary.isPrefix(nextWord)) {
             return;
         }
 
-        visited[r][c] = true; // Tandai sebagai dikunjungi
+        visited[r][c] = true;
 
-        // Jika kata valid dan panjangnya minimal 3, tambahkan ke daftar
         if (nextWord.length() >= 3 && WordDictionary.isValidWord(nextWord)) {
             foundWords.add(nextWord);
         }
 
-        // Jelajahi tetangga (8 arah)
         for (int i = 0; i < 8; i++) {
             findWordsFromTile(r + DR[i], c + DC[i], nextWord, visited, foundWords);
         }
 
-        visited[r][c] = false; // Backtrack: batalkan tanda kunjungan untuk jalur lain
+        visited[r][c] = false;
     }
-    // --- AKHIR METODE BARU ---
 
+    // Metode replaceUsedTiles tidak lagi dipanggil di GameScreen setelah setiap kata valid
+    // Karena kita akan melakukan full board scramble, metode ini tidak lagi relevan
+    // untuk kasus penggantian tile setelah kata terbentuk.
     public void replaceUsedTiles(Array<Tile> usedTiles) {
+        // Anda bisa memilih untuk menghapus metode ini jika tidak ada penggunaan lain
+        // atau membiarkannya jika Anda berencana menggunakannya untuk mekanik berbeda.
+        // Untuk tujuan ini, tidak ada perubahan yang diperlukan pada isi metode ini.
         for (Tile usedTile : usedTiles) {
             for (int r = 0; r < gridRows; r++) {
                 for (int c = 0; c < gridCols; c++) {
@@ -238,6 +205,7 @@ public class GameBoard {
             for (int c = 0; c < gridCols; c++) {
                 if (tileGrid[r][c] != null) {
                     tileGrid[r][c].dispose();
+                    tileGrid[r][c] = null; // Set to null after disposing
                 }
             }
         }
