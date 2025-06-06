@@ -2,8 +2,10 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -78,6 +80,9 @@ public class GameScreen extends ScreenAdapter {
     private float enemyX;
     private float enemyY;
 
+    private Texture backgroundImage;
+    private Music backgroundMusic;
+
     private enum BattleState {
         PLAYER_INPUT,           // Menunggu input kata dari player
         PLAYER_ATTACK_ANIMATION, // Animasi serangan player sedang berlangsung
@@ -113,6 +118,11 @@ public class GameScreen extends ScreenAdapter {
         enemyX = 650;
         enemyY = 485;
 
+        backgroundImage = new Texture(Gdx.files.internal("background.jpg")); // Sesuaikan path ini
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background_music.mp3")); // Sesuaikan path ini
+        backgroundMusic.setLooping(true); // Atur agar musik berulang
+        backgroundMusic.setVolume(0.25f); // Atur volume (0.0 - 1.0)
+        backgroundMusic.play();
         // Inisialisasi papan awal
         initializeNewBoard();
 
@@ -396,6 +406,7 @@ public class GameScreen extends ScreenAdapter {
 
         batch.begin();
 
+        batch.draw(backgroundImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         for (int r = 0; r < gameBoard.getGridRows(); r++) {
             for (int c = 0; c < gameBoard.getGridCols(); c++) {
                 Tile tile = gameBoard.tileGrid[r][c];
