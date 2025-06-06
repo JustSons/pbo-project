@@ -130,11 +130,17 @@ public class GameScreen extends ScreenAdapter {
         // BARU: Tombol untuk menggunakan Health Potion
         usePotionButton = new TextButton("Use Potion", skin);
         usePotionButton.setSize(120, 50);
-        usePotionButton.setPosition(50, Gdx.graphics.getHeight() - 100); // Sesuaikan posisi
+        usePotionButton.setPosition(50, Gdx.graphics.getHeight() - 100);
         usePotionButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                player.useHealthPotion(); // Panggil metode penggunaan potion di player
+                // Saat tombol ini diklik, cukup panggil useHealthPotion() di Player
+                player.useHealthPotion();
+                // Setelah digunakan, update konten backpack jika terbuka,
+                // karena jumlah potion bisa berubah
+                if (isBackpackOpen) {
+                    updateBackpackContent();
+                }
             }
         });
         stage.addActor(usePotionButton);
@@ -223,8 +229,20 @@ public class GameScreen extends ScreenAdapter {
                 actionButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
-                        item.interact(player); // Panggil metode interact() item
+                        // --- BARU: Logika penggunaan item dari backpack ---
+                        if (item instanceof HealthPotion) {
+                            // Jika item adalah HealthPotion, panggil metode useHealthPotion() dari player
+                            // Metode ini akan menangani penyembuhan DAN penghapusan dari inventaris
+                            player.useHealthPotion();
+                        } else if (item instanceof Weapon) {
+                            // Jika item adalah Weapon, panggil interact() pada weapon tersebut
+                            // Ini akan melengkapi senjata (tidak menghapus dari inventaris)
+                            item.interact(player);
+                        }
+                        // Anda bisa menambahkan logika 'else if' untuk tipe Item lain di sini
+
                         updateBackpackContent(); // Perbarui tampilan backpack setelah item digunakan/dilengkapi
+                        // Juga pastikan tampilan jumlah potion diperbarui (ini akan terjadi saat render berikutnya)
                     }
                 });
                 inventoryTable.add(actionButton).width(80).height(30).pad(5).row();
@@ -343,8 +361,10 @@ public class GameScreen extends ScreenAdapter {
                 System.out.println("Enemy defeated! Spawning new enemy.");
 
                 // BARU: Small chance to get HealthPotion
-                if (MathUtils.random.nextFloat() < 0.3f) { // 30% chance
-                    player.addHealthPotion();
+                if (MathUtils.random.nextFloat() < 1f) { // 30% chance
+                    HealthPotion newPotion = new HealthPotion(); // BUAT OBJEK HEALTHPOTION NYATA
+                    player.addHealthPotion(newPotion); // TAMBAHKAN KE INVENTORY PLAYER
+                    System.out.println("You found a Health Potion!");
                 }
 
                 // Very small chance to get new weapon
