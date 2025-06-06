@@ -115,7 +115,7 @@ public class GameScreen extends ScreenAdapter {
 
         defaultTileTextureRegion = game.getTileTextureRegion();
 
-        enemyX = 650;
+        enemyX = 635;
         enemyY = 485;
 
         backgroundImage = new Texture(Gdx.files.internal("background.jpg")); // Sesuaikan path ini
@@ -377,7 +377,7 @@ public class GameScreen extends ScreenAdapter {
 
         if (isValidWord) {
             System.out.println("Valid word formed: " + currentWord);
-            resetWordSelection(); // Reset seleksi setelah kata valid
+             // Reset seleksi setelah kata valid
 
             // Mulai sequence serangan player
             currentBattleState = BattleState.PLAYER_ATTACK_ANIMATION;
@@ -444,7 +444,7 @@ public class GameScreen extends ScreenAdapter {
 
         if (currentEnemy.getCurrentState() != GameEntity.CharacterState.DYING || !currentEnemy.getCurrentPlayingAnimation().isAnimationFinished(currentEnemy.getStateTime())) {
             currentEnemy.render(batch, enemyX, enemyY);
-            game.font.draw(batch, currentEnemy.getClass().getSimpleName() + " HP: " + currentEnemy.getHealth() + "/" + currentEnemy.getMaxHealth(), 810,630);
+            game.font.draw(batch, currentEnemy.getClass().getSimpleName() + " HP: " + currentEnemy.getHealth() + "/" + currentEnemy.getMaxHealth(), 795,630);
         } else {
             // Opsional: Tampilkan "Enemy Defeated!" atau hapus dari layar sepenuhnya
             game.font.draw(batch, "Enemy Defeated!", enemyX, enemyY + 110);
@@ -486,6 +486,7 @@ public class GameScreen extends ScreenAdapter {
                     int wordValue = WordCalculator.calculateWordValue(selectedTiles);
                     int totalDamageToEnemy = wordValue + player.getAttackPower();
                     currentEnemy.takeDamage(totalDamageToEnemy);
+                    resetWordSelection();
                     System.out.println(wordValue);
                     System.out.println(totalDamageToEnemy);
                     System.out.println("Player attacks " + currentEnemy.getClass().getSimpleName() + " for " + totalDamageToEnemy + " damage.");

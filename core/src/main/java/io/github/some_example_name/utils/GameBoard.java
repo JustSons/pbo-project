@@ -88,7 +88,7 @@ public class GameBoard {
                     tileGrid[r][c] = new GemTile(randomLetter, "Red", 2, tileX, tileY, tileSize, tileSize);
                 } else if (chance < 0.15f) { // 10% FireTile (0.05 + 0.10)
                     tileGrid[r][c] = new FireTile(randomLetter, tileX, tileY, tileSize, tileSize);
-                    ((FireTile) tileGrid[r][c]).addEffect(new BonusDamageEffect(5));
+//                    ((FireTile) tileGrid[r][c]).addEffect(new BonusDamageEffect(5));
                 } else { // Sisanya BasicLetterTile
                     tileGrid[r][c] = new BasicLetterTile(randomLetter, tileX, tileY, tileSize, tileSize);
                 }
@@ -162,7 +162,7 @@ public class GameBoard {
                             tileGrid[r][c] = new GemTile(randomLetter, "Green", 2, tileX, tileY, tileSize, tileSize);
                         } else if (chance < 0.10f) {
                             tileGrid[r][c] = new FireTile(randomLetter, tileX, tileY, tileSize, tileSize);
-                            ((FireTile) tileGrid[r][c]).addEffect(new BonusDamageEffect(5));
+//                            ((FireTile) tileGrid[r][c]).addEffect(new BonusDamageEffect(5));
                         } else {
                             tileGrid[r][c] = new BasicLetterTile(randomLetter, tileX, tileY, tileSize, tileSize);
                         }
