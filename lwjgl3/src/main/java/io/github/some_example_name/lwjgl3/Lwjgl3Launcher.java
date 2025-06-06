@@ -22,7 +22,7 @@ public class Lwjgl3Launcher {
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setTitle("BookwormGame"); // Judul jendela game Anda
-        configuration.setWindowedMode(800, 600); // Ukuran jendela game (lebar, tinggi)
+        configuration.setWindowedMode(1000, 800); // Ukuran jendela game (lebar, tinggi)
         configuration.useVsync(true); // Mengaktifkan VSync untuk sinkronisasi vertikal (menghindari screen tearing)
         configuration.setForegroundFPS(60); // Batasi Frames Per Second (FPS) ketika jendela dalam fokus
         // configuration.setIdleFPS(10); // Opsional: Batasi FPS ketika jendela tidak dalam fokus (misalnya, di latar belakang)

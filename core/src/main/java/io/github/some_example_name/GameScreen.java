@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 
 // Import kelas-kelas OOP Anda
+import io.github.some_example_name.entities.GameEntity;
 import io.github.some_example_name.entities.Player;
 import io.github.some_example_name.entities.enemies.Enemy;
 import io.github.some_example_name.entities.enemies.Goblin;
@@ -73,6 +74,17 @@ public class GameScreen extends ScreenAdapter {
     private com.badlogic.gdx.scenes.scene2d.ui.Window backpackWindow; // BARU: Jendela backpack
     private com.badlogic.gdx.scenes.scene2d.ui.Table inventoryTable; // BARU: Tabel di dalam jendela
 
+    private enum BattleState {
+        PLAYER_INPUT,           // Menunggu input kata dari player
+        PLAYER_ATTACK_ANIMATION, // Animasi serangan player sedang berlangsung
+        ENEMY_HIT_ANIMATION,    // Animasi musuh terkena serangan sedang berlangsung
+        ENEMY_TURN_ATTACK_ANIMATION, // Animasi serangan musuh sedang berlangsung
+        PLAYER_HIT_ANIMATION,   // Animasi player terkena serangan sedang berlangsung
+        CHECK_ROUND_END,        // Mengecek apakah ada yang mati, ganti musuh, dll.
+        GAME_OVER_SCREEN        // Game berakhir
+    }
+    private BattleState currentBattleState;
+
     public GameScreen(final BookwormGame game) {
         this.game = game;
         batch = game.batch;
@@ -82,13 +94,13 @@ public class GameScreen extends ScreenAdapter {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
 
-        gridStartX = (800 - (gridCols * tileSize)) / 2;
-        gridStartY = (600 - (gridRows * tileSize)) / 2;
+        gridStartX = (1000 - (gridCols * tileSize)) / 2;
+        gridStartY = (800 - (gridRows * tileSize)) / 2;
 
-        player = new Player("characters/player.png");
+        player = new Player("characters/player/");
         player.equipWeapon(new BasicSword()); // Set initial weapon
 
-        currentEnemy = new Goblin("characters/goblin.png");
+        currentEnemy = new Goblin("characters/goblin/");
 
         defaultTileTextureRegion = game.getTileTextureRegion();
 
@@ -190,6 +202,8 @@ public class GameScreen extends ScreenAdapter {
         backpackWindow.add(closeBackpackButton).width(80).height(30).padBottom(10).center(); // Tambahkan tombol close
 
         // Gdx.input.setInputProcessor(new com.badlogic.gdx.InputMultiplexer(stage, new TileInputProcessor(this))); // Tetap seperti ini
+
+        currentBattleState = BattleState.PLAYER_INPUT;
 
         Gdx.input.setInputProcessor(new com.badlogic.gdx.InputMultiplexer(stage, new TileInputProcessor(this)));
     }
@@ -344,86 +358,17 @@ public class GameScreen extends ScreenAdapter {
 
         if (isValidWord) {
             System.out.println("Valid word formed: " + currentWord);
-            int wordValue = WordCalculator.calculateWordValue(selectedTiles);
-            int totalDamageToEnemy = wordValue + player.getAttackPower(); // Menggunakan getAttackPower() Player
+            resetWordSelection(); // Reset seleksi setelah kata valid
 
-            System.out.println("Player attacks " + currentEnemy.getClass().getSimpleName() + " for " + totalDamageToEnemy + " damage.");
-            currentEnemy.takeDamage(totalDamageToEnemy);
-
-            for (Tile tile : selectedTiles) {
-                for (TileEffect effect : tile.getActiveEffects()) {
-                    effect.onWordUse(tile, currentEnemy);
-                }
-            }
-
-            if (!currentEnemy.isAlive()) {
-                player.addScore(currentEnemy.getGoldDrop());
-                System.out.println("Enemy defeated! Spawning new enemy.");
-
-                // BARU: Small chance to get HealthPotion
-                if (MathUtils.random.nextFloat() < 1f) { // 30% chance
-                    HealthPotion newPotion = new HealthPotion(); // BUAT OBJEK HEALTHPOTION NYATA
-                    player.addHealthPotion(newPotion); // TAMBAHKAN KE INVENTORY PLAYER
-                    System.out.println("You found a Health Potion!");
-                }
-
-                // Very small chance to get new weapon
-                if (MathUtils.random.nextFloat() < 0.05f) { // 5% chance
-                    Weapon droppedWeapon; // Deklarasikan variabel weapon
-                    if (MathUtils.random.nextFloat() < 0.5f) {
-                        droppedWeapon = new BasicSword();
-                        System.out.println("You found a new weapon: Basic Sword!");
-                    } else {
-                        droppedWeapon = new MagicStaff();
-                        System.out.println("You found a new weapon: Magic Staff!");
-                    }
-                    player.addItem(droppedWeapon); // <--- TAMBAHKAN KE INVENTORY, JANGAN LANGSUNG EQUIP
-                }
-
-                currentEnemy.dispose(); // Hapus musuh lama
-                // Spawn musuh baru secara acak
-                float enemySpawnChance = MathUtils.random.nextFloat();
-                if (enemySpawnChance < 0.4f) { // 40% Goblin
-                    currentEnemy = new Goblin("characters/goblin.png");
-                } else if (enemySpawnChance < 0.8f) { // 40% Ogre
-                    currentEnemy = new Ogre("characters/ogre.png");
-                } else { // 20% Dragon (jika ada Dragon class)
-                    // Asumsi ada kelas Dragon atau musuh lain yang lebih kuat
-                    currentEnemy = new Ogre("characters/dragon.png"); // Menggunakan Ogre sebagai placeholder
-                }
-                System.out.println("New enemy spawned: " + currentEnemy.getClass().getSimpleName());
-
-            } else {
-                // BARU: Musuh menyerang balik jika masih hidup
-                int enemyDamage = currentEnemy.getAttackPower(); // Asumsi Enemy memiliki getAttackPower()
-                player.takeDamage(enemyDamage);
-                System.out.println(currentEnemy.getClass().getSimpleName() + " attacks player for " + enemyDamage + " damage.");
-
-                // BARU: Cek Game Over
-                if (!player.isAlive()) {
-                    System.out.println("Game Over! You were defeated by " + currentEnemy.getClass().getSimpleName() + ".");
-                    game.setScreen(new GameOverScreen(game, player.getScore())); // Transisi ke GameOverScreen
-                    dispose(); // Buang GameScreen saat ini
-                    return; // Hentikan eksekusi metode ini
-                }
-            }
-
-            gameBoard.replaceUsedTiles(selectedTiles);
-            // --- Cek apakah ada kata yang tersisa setelah tile diganti ---
-            List<String> solutions = gameBoard.findAllValidWords();
-            if (solutions.isEmpty()) {
-                Gdx.app.log("GameScreen", "No valid words left on the board! Resetting board...");
-                initializeNewBoard(); // Panggil ulang untuk membuat papan baru
-            } else {
-                Collections.sort(solutions);
-                Gdx.app.log("GameScreen", "New Board Solutions after submit: " + solutions);
-            }
-            // --- Akhir Pembaruan ---
-
+            // Mulai sequence serangan player
+            currentBattleState = BattleState.PLAYER_ATTACK_ANIMATION;
+            player.setState(GameEntity.CharacterState.ATTACKING);
+            currentEnemy.setState(GameEntity.CharacterState.IDLE); // Pastikan musuh dalam keadaan idle
+            // stateTimer = 0f; // stateTime diupdate otomatis di GameEntity.update()
         } else {
             System.out.println("Invalid word: " + currentWord + ". Try again!");
+            resetWordSelection();
         }
-        resetWordSelection();
     }
 
     private void resetWordSelection() {
@@ -465,10 +410,10 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
-        player.render(batch, 50, 50);
-        game.font.draw(batch, "Player HP: " + player.getHealth() + "/" + player.getMaxHealth(), 50, 150);
-        game.font.draw(batch, "Player Score: " + player.getScore(), 50, 130);
-        game.font.draw(batch, "Equipped: " + player.getEquippedWeapon().getName(), 50, 110);
+        player.render(batch, -160, -80);
+        game.font.draw(batch, "Player HP: " + player.getHealth() + "/" + player.getMaxHealth(), 20, 80);
+        game.font.draw(batch, "Player Score: " + player.getScore(), 20, 60);
+        game.font.draw(batch, "Equipped: " + player.getEquippedWeapon().getName(), 20, 40);
 
         // BARU: Tampilkan jumlah Health Potion
         String potionText = "Potions: " + player.getHealthPotions();
@@ -478,23 +423,160 @@ public class GameScreen extends ScreenAdapter {
         // AKHIR BARU
 
         if (currentEnemy.isAlive()) {
-            currentEnemy.render(batch, 600, 400);
-            game.font.draw(batch, currentEnemy.getClass().getSimpleName() + " HP: " + currentEnemy.getHealth() + "/" + currentEnemy.getMaxHealth(), 600, 450);
+            currentEnemy.render(batch, 650, 485);
+            game.font.draw(batch, currentEnemy.getClass().getSimpleName() + " HP: " + currentEnemy.getHealth() + "/" + currentEnemy.getMaxHealth(), 815, 635);
         } else {
             game.font.draw(batch, "Enemy Defeated!", 600, 450);
         }
 
-        game.font.draw(batch, "Current Word: " + currentWord, 10, Gdx.graphics.getHeight() - 20);
+        String currentWordText = "Current Word: " + currentWord;
+        glyphLayout.setText(game.font, currentWordText);
+        float currentWordTextWidth = glyphLayout.width;
+        float currentWordTextX = (Gdx.graphics.getWidth() - currentWordTextWidth) / 2;
+        float currentWordTextY = gridStartY + gridRows * tileSize + 20 + usePotionButton.getHeight() + 10 + 20;
 
+        game.font.draw(batch, currentWordText, currentWordTextX, currentWordTextY);
         batch.end();
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
 
-        player.updateEffects(delta);
-        if (currentEnemy != null && currentEnemy.isAlive()) { // Tambahkan null check untuk currentEnemy
-            currentEnemy.updateEffects(delta);
+        player.update(delta);
+        if (currentEnemy != null && currentEnemy.isAlive()) {
+            currentEnemy.update(delta);
         }
+
+
+        switch (currentBattleState) {
+            case PLAYER_INPUT:
+                // Do nothing, wait for user input (handled by input processor and submit button)
+                break;
+
+            case PLAYER_ATTACK_ANIMATION:
+                // Update animasi player dan musuh sudah dilakukan di atas (player.update(delta), currentEnemy.update(delta))
+
+                // Jika animasi serangan player selesai (player kembali ke idle secara otomatis)
+                if (player.getCurrentState() == GameEntity.CharacterState.IDLE) {
+                    // Damage diterapkan di sini, setelah animasi serangan selesai
+                    int wordValue = WordCalculator.calculateWordValue(selectedTiles);
+                    int totalDamageToEnemy = wordValue + player.getAttackPower();
+                    currentEnemy.takeDamage(totalDamageToEnemy);
+                    System.out.println("Player attacks " + currentEnemy.getClass().getSimpleName() + " for " + totalDamageToEnemy + " damage.");
+
+                    for (Tile tile : selectedTiles) {
+                        for (TileEffect effect : tile.getActiveEffects()) {
+                            effect.onWordUse(tile, currentEnemy);
+                        }
+                    }
+
+                    // Transisi ke animasi hit musuh
+                    currentEnemy.setState(GameEntity.CharacterState.HIT);
+                    currentBattleState = BattleState.ENEMY_HIT_ANIMATION;
+                    // stateTimer = 0f; // stateTime sudah direset oleh currentEnemy.setState()
+                }
+                break;
+
+            case ENEMY_HIT_ANIMATION:
+                // Update animasi player dan musuh sudah dilakukan di atas
+
+                // Jika animasi hit musuh selesai (musuh kembali ke idle secara otomatis)
+                if (currentEnemy.getCurrentState() == GameEntity.CharacterState.IDLE) {
+                    currentBattleState = BattleState.CHECK_ROUND_END; // Lanjut ke pengecekan
+                    // stateTimer = 0f;
+                }
+                break;
+
+            case CHECK_ROUND_END:
+                // Cek apakah musuh mati atau player mati dari serangan sebelumnya
+                if (!currentEnemy.isAlive()) {
+                    player.addScore(currentEnemy.getGoldDrop());
+                    System.out.println("Enemy defeated! Spawning new enemy.");
+
+                    // Drop item (HealthPotion atau Weapon)
+                    if (MathUtils.random.nextFloat() < 0.3f) {
+                        HealthPotion newPotion = new HealthPotion();
+                        player.addHealthPotion(newPotion);
+                        System.out.println("You found a Health Potion!");
+                    }
+                    if (MathUtils.random.nextFloat() < 0.05f) {
+                        Weapon droppedWeapon;
+                        if (MathUtils.random.nextFloat() < 0.5f) {
+                            droppedWeapon = new BasicSword();
+                            System.out.println("You found a new weapon: Basic Sword!");
+                        } else {
+                            droppedWeapon = new MagicStaff();
+                            System.out.println("You found a new weapon: Magic Staff!");
+                        }
+                        player.addItem(droppedWeapon);
+                    }
+
+                    currentEnemy.dispose();
+                    float enemySpawnChance = MathUtils.random.nextFloat();
+                    if (enemySpawnChance < 0.4f) {
+                        currentEnemy = new Goblin("characters/goblin/"); // Gunakan base path
+                    } else if (enemySpawnChance < 0.8f) {
+                        currentEnemy = new Ogre("characters/ogre/"); // Ganti dengan base path Ogre Anda
+                    } else {
+                        currentEnemy = new Ogre("characters/dragon/"); // Ganti dengan base path Dragon Anda
+                    }
+                    System.out.println("New enemy spawned: " + currentEnemy.getClass().getSimpleName());
+                    currentEnemy.setState(GameEntity.CharacterState.IDLE); // Pastikan musuh baru dalam idle
+
+                    gameBoard.replaceUsedTiles(selectedTiles); // Ganti tile yang digunakan
+                    List<String> solutions = gameBoard.findAllValidWords();
+                    if (solutions.isEmpty()) {
+                        Gdx.app.log("GameScreen", "No valid words left on the board! Resetting board...");
+                        initializeNewBoard();
+                    } else {
+                        Collections.sort(solutions);
+                        Gdx.app.log("GameScreen", "New Board Solutions after submit: " + solutions);
+                    }
+
+                    currentBattleState = BattleState.PLAYER_INPUT; // Kembali ke input player
+                    player.setState(GameEntity.CharacterState.IDLE); // Pastikan player idle
+
+                } else if (!player.isAlive()) {
+                    currentBattleState = BattleState.GAME_OVER_SCREEN;
+                    game.setScreen(new GameOverScreen(game, player.getScore()));
+                    dispose();
+                } else {
+                    // Jika musuh tidak mati, musuh menyerang balik
+                    currentBattleState = BattleState.ENEMY_TURN_ATTACK_ANIMATION;
+                    currentEnemy.setState(GameEntity.CharacterState.ATTACKING);
+                    player.setState(GameEntity.CharacterState.IDLE); // Pastikan player idle
+                }
+                break;
+
+            case ENEMY_TURN_ATTACK_ANIMATION:
+                // Update animasi player dan musuh sudah dilakukan di atas
+
+                // Jika animasi serangan musuh selesai (musuh kembali ke idle secara otomatis)
+                if (currentEnemy.getCurrentState() == GameEntity.CharacterState.IDLE) {
+                    // Damage diterapkan di sini
+                    int enemyDamage = currentEnemy.getAttackPower();
+                    player.takeDamage(enemyDamage);
+                    System.out.println(currentEnemy.getClass().getSimpleName() + " attacks player for " + enemyDamage + " damage.");
+
+                    // Transisi ke animasi hit player
+                    player.setState(GameEntity.CharacterState.HIT);
+                    currentBattleState = BattleState.PLAYER_HIT_ANIMATION;
+                }
+                break;
+
+            case PLAYER_HIT_ANIMATION:
+                // Update animasi player dan musuh sudah dilakukan di atas
+
+                // Jika animasi hit player selesai (player kembali ke idle secara otomatis)
+                if (player.getCurrentState() == GameEntity.CharacterState.IDLE) {
+                    currentBattleState = BattleState.PLAYER_INPUT; // Kembali ke input player
+                }
+                break;
+
+            case GAME_OVER_SCREEN:
+                // Jangan lakukan apa-apa, GameScreen akan dispose dan transisi ke GameOverScreen
+                break;
+        }
+        // --- AKHIR LOGIKA STATE PERTARUNGAN ---
     }
 
     @Override

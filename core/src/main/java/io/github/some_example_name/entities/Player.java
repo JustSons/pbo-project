@@ -3,21 +3,28 @@ package io.github.some_example_name.entities;
 import com.badlogic.gdx.utils.Array;
 import io.github.some_example_name.items.Item;
 import io.github.some_example_name.items.weapons.Weapon;
-import io.github.some_example_name.items.potions.HealthPotion; // Pastikan ini diimpor
+import io.github.some_example_name.items.potions.HealthPotion;
 
 public class Player extends GameEntity {
     private int score;
-    private Array<Item> inventory; // Komposisi: Player HAS A list of Items
+    private Array<Item> inventory;
     private Weapon equippedWeapon;
 
-    // HAPUS healthPotionsCount; kita akan menghitungnya dari inventaris
-    // private int healthPotionsCount;
+    public Player(String basePath) { // Menerima base path untuk semua animasi Player
+        // MODIFIKASI: Panggil super() HANYA dengan parameter animasi IDLE
+        // Ini adalah 8 argumen yang diharapkan oleh konstruktor GameEntity
+        super(200, 10, // maxHealth, attackPower
+            basePath + "Idle.png", 10, 1, 0.125f, // idleSpriteSheetPath, idleFrameCols, idleFrameRows, idleFrameDuration
+            500, 500); // displayWidth, displayHeight
 
-    public Player(String texturePath) {
-        super(200, 10, texturePath);
         this.score = 0;
         this.inventory = new Array<>();
-        // HAPUS inisialisasi healthPotionsCount
+
+        // BARU: Panggil metode setter untuk animasi Attack dan Hit setelah super()
+        // Ini adalah tempat 8 argumen tambahan Anda sebelumnya akan digunakan
+        setAttackAnimation(basePath + "Attack.png", 7, 1, 0.1f);
+        setHitAnimation(basePath + "Hit.png", 3, 1, 0.15f);
+
         System.out.println("Player created!");
     }
 
@@ -45,7 +52,6 @@ public class Player extends GameEntity {
     public void addItem(Item item) {
         inventory.add(item);
         System.out.println("Player picked up: " + item.getName());
-        // Tambahkan logika khusus jika ini HealthPotion
         if (item instanceof HealthPotion) {
             System.out.println("Player now has " + getHealthPotions() + " health potions.");
         }
@@ -68,14 +74,10 @@ public class Player extends GameEntity {
         return score;
     }
 
-    // --- Health Potion Specific Methods (MODIFIKASI) ---
-
-    // MODIFIKASI: addHealthPotion sekarang menerima objek HealthPotion
     public void addHealthPotion(HealthPotion potion) {
-        addItem(potion); // Gunakan metode addItem yang sudah ada untuk menambahkannya ke inventaris
+        addItem(potion);
     }
 
-    // MODIFIKASI: getHealthPotions sekarang menghitung potion di inventaris
     public int getHealthPotions() {
         int count = 0;
         for (Item item : inventory) {
@@ -86,20 +88,17 @@ public class Player extends GameEntity {
         return count;
     }
 
-    // MODIFIKASI: useHealthPotion mencari dan menggunakan potion dari inventaris
     public void useHealthPotion() {
-        // Cari HealthPotion pertama di inventaris
         for (int i = 0; i < inventory.size; i++) {
             Item item = inventory.get(i);
             if (item instanceof HealthPotion) {
                 HealthPotion potion = (HealthPotion) item;
-                potion.interact(this); // Interaksi potion dengan pemain (akan memanggil player.heal())
-                inventory.removeIndex(i); // Hapus potion dari inventaris setelah digunakan
-                System.out.println("Used Health Potion. Remaining: " + getHealthPotions()); // Perbarui tampilan
-                return; // Keluar setelah menggunakan satu potion
+                potion.interact(this);
+                inventory.removeIndex(i);
+                System.out.println("Used Health Potion. Remaining: " + getHealthPotions());
+                return;
             }
         }
-        System.out.println("No Health Potions to use!"); // Jika tidak ada potion ditemukan
+        System.out.println("No Health Potions to use!");
     }
-    // --- End Health Potion Methods ---
 }
