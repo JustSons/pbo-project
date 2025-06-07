@@ -13,7 +13,7 @@ public class WordCalculator {
         int fireTileDirectDamageBonus = 0; // BARU: Untuk bonus damage +5 dari FireTile
 
         for (Tile tile : selectedTiles) {
-            totalTileValues += tile.getValue(); // Mengambil nilai dasar tile (yang sudah termasuk bonus +2 dari FireTile jika itu FireTile)
+            totalTileValues ++; // Mengambil nilai dasar tile (yang sudah termasuk bonus +2 dari FireTile jika itu FireTile)
 
             if (tile instanceof GemTile) {
                 wordMultiplier *= ((GemTile) tile).getBonusMultiplier();

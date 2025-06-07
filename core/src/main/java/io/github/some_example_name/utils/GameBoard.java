@@ -88,10 +88,15 @@ public class GameBoard {
                 float tileY = gridStartY + r * tileSize;
 
                 float chance = MathUtils.random.nextFloat();
+                float greenblue = MathUtils.random.nextFloat();
                 if (chance < 0.05f) { // 5% kemungkinan GemTile
                     // Jika ini adalah slot GemTile, maka hurufnya HARUS dari set langka
                     letterForTile = getRandomRareLetterForGem();
-                    tileGrid[r][c] = new GemTile(letterForTile, "Red", 2, tileX, tileY, tileSize, tileSize);
+                    if (greenblue < 0.5f) {
+                        tileGrid[r][c] = new GemTile(letterForTile, "Blue", 2, tileX, tileY, tileSize, tileSize);
+                    }else {
+                        tileGrid[r][c] = new GemTile(letterForTile, "Green", 2, tileX, tileY, tileSize, tileSize);
+                    }
                 } else if (chance < 0.15f) { // 10% kemungkinan FireTile (0.05 + 0.10)
                     // FireTile bisa berupa huruf umum
                     letterForTile = WordDictionary.getRandomCommonLetter().charAt(0);

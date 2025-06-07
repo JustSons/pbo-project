@@ -5,8 +5,8 @@ public class FireTile extends Tile { // Inheritance: FireTile IS A Tile
     private int bonusDamage;
 
     public FireTile(char letter, float x, float y, float width, float height) {
-        super(letter, "tiles/fire_tile.png", calculateBasicValue(letter) + 2, x, y, width, height); // Nilai dasar + bonus
-        this.bonusDamage = 2;
+        super(letter, "tiles/fire_tile.png", calculateBasicValue(letter), x, y, width, height); // Nilai dasar + bonus
+        this.bonusDamage = 3;
         System.out.println("Fire Tile '" + letter + "' created.");
     }
 
