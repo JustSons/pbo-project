@@ -26,7 +26,7 @@ public class Lwjgl3Launcher {
         configuration.useVsync(true); // Mengaktifkan VSync untuk sinkronisasi vertikal (menghindari screen tearing)
         configuration.setForegroundFPS(60); // Batasi Frames Per Second (FPS) ketika jendela dalam fokus
         // configuration.setIdleFPS(10); // Opsional: Batasi FPS ketika jendela tidak dalam fokus (misalnya, di latar belakang)
-        // configuration.setResizable(false); // Opsional: Untuk membuat jendela tidak bisa diubah ukurannya
+         configuration.setResizable(false); // Opsional: Untuk membuat jendela tidak bisa diubah ukurannya
         // configuration.setMaximized(true); // Opsional: Untuk memulai dalam mode maximized
         // configuration.setInitialVisible(true); // Opsional: Memastikan jendela terlihat saat aplikasi dimulai
         // configuration.setDecorated(true); // Opsional: Menampilkan dekorasi jendela (misalnya, tombol minimize/maximize/close)
