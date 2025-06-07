@@ -7,7 +7,7 @@ import io.github.some_example_name.items.potions.HealthPotion;
 
 public class Player extends GameEntity {
     private int score;
-    private Array<Item> inventory;
+    private Array<Item> inventory; // Komposisi: Player HAS A list of Items
     private Weapon equippedWeapon;
 
     public Player(String basePath) { // Menerima base path untuk semua animasi Player
@@ -63,8 +63,27 @@ public class Player extends GameEntity {
     }
 
     public void equipWeapon(Weapon newWeapon) {
+        // Jika sudah ada senjata yang di-equip DAN senjata baru berbeda dari yang sedang di-equip,
+        // kembalikan senjata lama ke inventaris.
+        if (this.equippedWeapon != null && this.equippedWeapon != newWeapon) {
+            // Hanya tambahkan kembali ke inventaris jika senjata lama belum ada di sana
+            // Ini mencegah duplikat jika somehow senjata yang sama di-equip ulang dari inventory
+            if (!inventory.contains(this.equippedWeapon, true)) {
+                inventory.add(this.equippedWeapon);
+                System.out.println("Old weapon '" + this.equippedWeapon.getName() + "' returned to inventory.");
+            }
+        }
+
+        // Sekarang, equip senjata baru
         this.equippedWeapon = newWeapon;
         System.out.println("Player equipped: " + newWeapon.getName());
+
+        // Hapus senjata yang baru saja di-equip dari inventaris, jika ia memang ada di sana
+        // Ini penting karena senjata baru ini berasal dari inventaris
+        if (inventory.contains(newWeapon, true)) {
+            inventory.removeValue(newWeapon, true);
+            System.out.println("Removed new equipped weapon '" + newWeapon.getName() + "' from inventory.");
+        }
     }
 
     public Weapon getEquippedWeapon() {
