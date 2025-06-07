@@ -18,11 +18,13 @@ public class WordCalculator {
             if (tile instanceof GemTile) {
                 wordMultiplier *= ((GemTile) tile).getBonusMultiplier();
             } else if (tile instanceof FireTile) {
-                // Menambahkan bonus damage spesifik dari FireTile (yang bernilai 5)
+                // Menambahkan bonus damage spesifik dari FireTile (yang bernilai 2)
                 fireTileDirectDamageBonus += ((FireTile) tile).getBonusDamage();
             }
         }
-        System.out.println(totalTileValues);
+        System.out.println("firegemtile:"+fireTileDirectDamageBonus);
+        System.out.println("wordmultiplier:"+wordMultiplier);
+        System.out.println("totaltilevalue:"+totalTileValues);
         // Total damage adalah (penjumlahan nilai dasar * multiplier) + bonus damage langsung dari FireTile
         return (totalTileValues * wordMultiplier) + fireTileDirectDamageBonus;
     }

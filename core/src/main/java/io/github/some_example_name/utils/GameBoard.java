@@ -31,6 +31,9 @@ public class GameBoard {
     private final int[] DR = {-1, -1, -1, 0, 0, 1, 1, 1};
     private final int[] DC = {-1, 0, 1, -1, 1, -1, 0, 1};
 
+    private static final char[] RARE_LETTERS_FOR_GEM = {'X', 'Y', 'Z', 'Q'};
+    private static final Random randomGenerator = new Random(); // Objek Random yang reusable
+
     public GameBoard(int rows, int cols, float tileSize, float startX, float startY, TextureRegion defaultTileRegion) {
         this.gridRows = rows;
         this.gridCols = cols;
@@ -79,18 +82,24 @@ public class GameBoard {
                     tileGrid[r][c] = null; // Set to null after disposing
                 }
 
-                char randomLetter = WordDictionary.getRandomCommonLetter().charAt(0);
+//                char randomLetter = WordDictionary.getRandomCommonLetter().charAt(0);
+                char letterForTile;
                 float tileX = gridStartX + c * tileSize;
                 float tileY = gridStartY + r * tileSize;
 
                 float chance = MathUtils.random.nextFloat();
-                if (chance < 0.05f) { // 5% GemTile
-                    tileGrid[r][c] = new GemTile(randomLetter, "Red", 2, tileX, tileY, tileSize, tileSize);
-                } else if (chance < 0.15f) { // 10% FireTile (0.05 + 0.10)
-                    tileGrid[r][c] = new FireTile(randomLetter, tileX, tileY, tileSize, tileSize);
-//                    ((FireTile) tileGrid[r][c]).addEffect(new BonusDamageEffect(5));
+                if (chance < 0.05f) { // 5% kemungkinan GemTile
+                    // Jika ini adalah slot GemTile, maka hurufnya HARUS dari set langka
+                    letterForTile = getRandomRareLetterForGem();
+                    tileGrid[r][c] = new GemTile(letterForTile, "Red", 2, tileX, tileY, tileSize, tileSize);
+                } else if (chance < 0.15f) { // 10% kemungkinan FireTile (0.05 + 0.10)
+                    // FireTile bisa berupa huruf umum
+                    letterForTile = WordDictionary.getRandomCommonLetter().charAt(0);
+                    tileGrid[r][c] = new FireTile(letterForTile, tileX, tileY, tileSize, tileSize);
                 } else { // Sisanya BasicLetterTile
-                    tileGrid[r][c] = new BasicLetterTile(randomLetter, tileX, tileY, tileSize, tileSize);
+                    // BasicLetterTile bisa berupa huruf umum
+                    letterForTile = WordDictionary.getRandomCommonLetter().charAt(0);
+                    tileGrid[r][c] = new BasicLetterTile(letterForTile, tileX, tileY, tileSize, tileSize);
                 }
             }
         }
@@ -99,6 +108,11 @@ public class GameBoard {
     // HAPUS metode ini karena tidak lagi diperlukan, kita menggunakan findAllValidWords()
     // public boolean hasAtLeastOneValidWord() { ... }
     // private boolean findWordFromTileForValidation(...) { ... }
+
+    private char getRandomRareLetterForGem() {
+        // Pilih secara acak dari array RARE_LETTERS_FOR_GEM
+        return RARE_LETTERS_FOR_GEM[randomGenerator.nextInt(RARE_LETTERS_FOR_GEM.length)];
+    }
 
     public List<String> findAllValidWords() {
         HashSet<String> foundWords = new HashSet<>();
