@@ -13,6 +13,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.graphics.g2d.BitmapFont; // BARU: Import BitmapFont
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator; // BARU: Import FreeTypeFontGenerator
 
 // UI Imports
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -76,6 +78,7 @@ public class GameScreen extends ScreenAdapter {
     private boolean isBackpackOpen = false; // BARU: State untuk backpack
     private com.badlogic.gdx.scenes.scene2d.ui.Window backpackWindow; // BARU: Jendela backpack
     private com.badlogic.gdx.scenes.scene2d.ui.Table inventoryTable; // BARU: Tabel di dalam jendela
+    private BitmapFont tileFont;
 
     private float enemyX;
     private float enemyY;
@@ -123,6 +126,21 @@ public class GameScreen extends ScreenAdapter {
         backgroundMusic.setLooping(true); // Atur agar musik berulang
         backgroundMusic.setVolume(0.25f); // Atur volume (0.0 - 1.0)
         backgroundMusic.play();
+
+        // --- BARU: Inisialisasi tileFont ---
+        // Ganti "fonts/your_tile_font.ttf" dengan jalur font yang Anda inginkan
+        // Anda bisa mencoba "fonts/pixel_font.ttf" yang sudah ada jika ingin font berbeda dari UI
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/tile_font.ttf")); // Sesuaikan path font
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 32; // Ukuran font, sesuaikan agar pas di bucket
+        parameter.color = Color.BLACK; // Warna huruf, sesuaikan agar terlihat di bucket (atau WHITE)
+        // Opsional: tambahkan outline untuk font
+        // parameter.borderColor = Color.WHITE;
+        // parameter.borderWidth = 1;
+        tileFont = generator.generateFont(parameter);
+        generator.dispose(); // Generator harus di-dispose setelah membuat font
+        // --- AKHIR BARU ---
+
         // Inisialisasi papan awal
         initializeNewBoard();
 
@@ -414,10 +432,11 @@ public class GameScreen extends ScreenAdapter {
                     tile.render(batch, tile.x, tile.y);
 
                     String letterStr = String.valueOf(tile.getLetter());
-                    glyphLayout.setText(game.font, letterStr);
+                    glyphLayout.setText(tileFont, letterStr); // MODIFIKASI: Gunakan tileFont di sini
                     float textWidth = glyphLayout.width;
                     float textHeight = glyphLayout.height;
-                    game.font.draw(batch, letterStr, tile.x + (tile.width - textWidth) / 2, tile.y + (tile.height + textHeight) / 2);
+                    // MODIFIKASI: Gunakan tileFont untuk menggambar huruf
+                    tileFont.draw(batch, letterStr, tile.x + (tile.width - textWidth) / 2, tile.y + (tile.height + textHeight) / 2);
 
                     if (selectedTiles.contains(tile, true)) {
                         batch.setColor(Color.YELLOW.cpy().mul(0.7f));
@@ -645,6 +664,9 @@ public class GameScreen extends ScreenAdapter {
         }
         if (skin != null) { // Tambahkan null check
             skin.dispose();
+        }
+        if (tileFont != null) {
+            tileFont.dispose();
         }
     }
 }
