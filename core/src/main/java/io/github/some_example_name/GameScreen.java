@@ -28,10 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 // Import kelas-kelas OOP Anda
 import io.github.some_example_name.entities.GameEntity;
 import io.github.some_example_name.entities.Player;
-import io.github.some_example_name.entities.enemies.Dragon;
-import io.github.some_example_name.entities.enemies.Enemy;
-import io.github.some_example_name.entities.enemies.Goblin;
-import io.github.some_example_name.entities.enemies.Ogre;
+import io.github.some_example_name.entities.enemies.*;
 import io.github.some_example_name.tiles.Tile;
 import io.github.some_example_name.effects.tile.TileEffect;
 import io.github.some_example_name.effects.tile.BonusDamageEffect;
@@ -89,6 +86,8 @@ public class GameScreen extends ScreenAdapter {
     private Sound playerHitSound; // BARU: Sound effect ketika player terkena hit
     private Sound playerDeathSound;
 
+    private float progress = 0f;
+
     private enum BattleState {
         PLAYER_INPUT,           // Menunggu input kata dari player
         PLAYER_ATTACK_ANIMATION, // Animasi serangan player sedang berlangsung
@@ -121,8 +120,8 @@ public class GameScreen extends ScreenAdapter {
 
         defaultTileTextureRegion = game.getTileTextureRegion();
 
-        enemyX = 635;
-        enemyY = 485;
+        enemyX = 629;
+        enemyY = 450;
 
         backgroundImage = new Texture(Gdx.files.internal("background.jpg")); // Sesuaikan path ini
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background_music.mp3")); // Sesuaikan path ini
@@ -468,7 +467,7 @@ public class GameScreen extends ScreenAdapter {
 
         if (currentEnemy.getCurrentState() != GameEntity.CharacterState.DYING || !currentEnemy.getCurrentPlayingAnimation().isAnimationFinished(currentEnemy.getStateTime())) {
             currentEnemy.render(batch, enemyX, enemyY);
-            game.font.draw(batch, currentEnemy.getClass().getSimpleName() + " HP: " + currentEnemy.getHealth() + "/" + currentEnemy.getMaxHealth(), 795,630);
+            game.font.draw(batch, currentEnemy.getClass().getSimpleName() + " HP: " + currentEnemy.getHealth() + "/" + currentEnemy.getMaxHealth(), 789,595);
         } else {
             // Opsional: Tampilkan "Enemy Defeated!" atau hapus dari layar sepenuhnya
             game.font.draw(batch, "Enemy Defeated!", enemyX, enemyY + 110);
@@ -586,6 +585,7 @@ public class GameScreen extends ScreenAdapter {
                     // Animasi kematian musuh selesai, lanjutkan dengan reward dan spawn musuh baru
                     player.addScore(currentEnemy.getGoldDrop());
                     System.out.println("Enemy defeated! Spawning new enemy.");
+                    progress += 0.05f;
 
                     // Drop item (HealthPotion atau Weapon)
                     if (MathUtils.random.nextFloat() < 0.3f) {
@@ -607,12 +607,17 @@ public class GameScreen extends ScreenAdapter {
 
                     currentEnemy.dispose(); // Hapus musuh lama sepenuhnya
                     float enemySpawnChance = MathUtils.random.nextFloat();
-                    if (enemySpawnChance < 0.4f) {
+                    if (progress >= 1f){
+                        currentEnemy = new Wizard("characters/wizard/");
+                        progress = 0f;
+                    }else if (enemySpawnChance < 0.4f) {
                         currentEnemy = new Goblin("characters/goblin/");
                     } else if (enemySpawnChance < 0.8f) {
                         currentEnemy = new Ogre("characters/ogre/");
-                    } else {
+                    } else if (enemySpawnChance < 0.98f) {
                         currentEnemy = new Dragon("characters/dragon/");
+                    } else {
+                        currentEnemy = new Wizard("characters/wizard/");
                     }
                     System.out.println("New enemy spawned: " + currentEnemy.getClass().getSimpleName());
                     currentEnemy.setState(GameEntity.CharacterState.IDLE);
