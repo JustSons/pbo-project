@@ -582,6 +582,7 @@ public class GameScreen extends ScreenAdapter {
                 // Jadi kita cek state-nya DAN apakah animasinya sudah selesai
                 if (currentEnemy.getCurrentState() == GameEntity.CharacterState.DYING &&
                     currentEnemy.getCurrentPlayingAnimation().isAnimationFinished(currentEnemy.getStateTime())) {
+                    boolean isWizardDefeated = (currentEnemy instanceof Wizard);
                     // Animasi kematian musuh selesai, lanjutkan dengan reward dan spawn musuh baru
                     player.addScore(currentEnemy.getGoldDrop());
                     System.out.println("Enemy defeated! Spawning new enemy.");
@@ -606,21 +607,33 @@ public class GameScreen extends ScreenAdapter {
                     }
 
                     currentEnemy.dispose(); // Hapus musuh lama sepenuhnya
-                    float enemySpawnChance = MathUtils.random.nextFloat();
-                    if (progress >= 1f){
-                        currentEnemy = new Wizard("characters/wizard/");
-                        progress = 0f;
-                    }else if (enemySpawnChance < 0.4f) {
-                        currentEnemy = new Goblin("characters/goblin/");
-                    } else if (enemySpawnChance < 0.8f) {
-                        currentEnemy = new Ogre("characters/ogre/");
-                    } else if (enemySpawnChance < 0.98f) {
-                        currentEnemy = new Dragon("characters/dragon/");
-                    } else {
-                        currentEnemy = new Wizard("characters/wizard/");
-                    }
-                    System.out.println("New enemy spawned: " + currentEnemy.getClass().getSimpleName());
-                    currentEnemy.setState(GameEntity.CharacterState.IDLE);
+
+                    // --- Logika SPESIFIK untuk Kemenangan Wizard atau Spawn Musuh Biasa ---
+                    if (isWizardDefeated) {
+                        System.out.println("Wizard defeated! You win!");
+                        // Hentikan musik latar belakang karena game selesai
+                        if (backgroundMusic != null) {
+                            backgroundMusic.stop();
+                        }
+                        // Transisi ke layar kemenangan
+                        game.setScreen(new WinScreen(game, player.getScore()));
+                        dispose(); // Dispose GameScreen ini karena sudah selesai
+                    }else {
+                        float enemySpawnChance = MathUtils.random.nextFloat();
+                        if (progress >= 1f) {
+                            currentEnemy = new Wizard("characters/wizard/");
+                            progress = 0f;
+                        } else if (enemySpawnChance < 0.4f) {
+                            currentEnemy = new Goblin("characters/goblin/");
+                        } else if (enemySpawnChance < 0.8f) {
+                            currentEnemy = new Ogre("characters/ogre/");
+                        } else if (enemySpawnChance < 0.98f) {
+                            currentEnemy = new Dragon("characters/dragon/");
+                        } else {
+                            currentEnemy = new Wizard("characters/wizard/");
+                        }
+                        System.out.println("New enemy spawned: " + currentEnemy.getClass().getSimpleName());
+                        currentEnemy.setState(GameEntity.CharacterState.IDLE);
 
 //                    gameBoard.replaceUsedTiles(selectedTiles);
 //                    List<String> solutions = gameBoard.findAllValidWords();
@@ -632,8 +645,9 @@ public class GameScreen extends ScreenAdapter {
 //                        Gdx.app.log("GameScreen", "New Board Solutions after submit: " + solutions);
 //                    }
 
-                    currentBattleState = BattleState.PLAYER_INPUT; // Kembali ke input player
-                    player.setState(GameEntity.CharacterState.IDLE);
+                        currentBattleState = BattleState.PLAYER_INPUT; // Kembali ke input player
+                        player.setState(GameEntity.CharacterState.IDLE);
+                    }
                 }
                 break;
 
