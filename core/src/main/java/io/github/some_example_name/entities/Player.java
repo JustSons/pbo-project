@@ -24,7 +24,7 @@ public class Player extends GameEntity {
         // Ini adalah tempat 8 argumen tambahan Anda sebelumnya akan digunakan
         setAttackAnimation(basePath + "Attack.png", 7, 1, 0.1f);
         setHitAnimation(basePath + "Hit.png", 3, 1, 0.15f);
-        setDyingAnimation(basePath + "Death.png",11,1,0.15f);
+        setDyingAnimation(basePath + "Death.png",11,1,0.2f);
 
         System.out.println("Player created!");
     }

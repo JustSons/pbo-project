@@ -107,8 +107,8 @@ public class GameOverScreen extends ScreenAdapter {
         if (stage != null) {
             stage.dispose();
         }
-        if (skin != null) {
-            skin.dispose();
-        }
+//        if (skin != null) {
+//            skin.dispose();
+//        }
     }
 }

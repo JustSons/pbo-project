@@ -3,6 +3,7 @@ package io.github.some_example_name;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -85,6 +86,8 @@ public class GameScreen extends ScreenAdapter {
 
     private Texture backgroundImage;
     private Music backgroundMusic;
+    private Sound playerHitSound; // BARU: Sound effect ketika player terkena hit
+    private Sound playerDeathSound;
 
     private enum BattleState {
         PLAYER_INPUT,           // Menunggu input kata dari player
@@ -127,6 +130,8 @@ public class GameScreen extends ScreenAdapter {
         backgroundMusic.setVolume(0.25f); // Atur volume (0.0 - 1.0)
         backgroundMusic.play();
 
+        playerHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/player_hit.wav")); // BARU: Muat sound effect
+        playerDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/death.wav")); //
         // --- BARU: Inisialisasi tileFont ---
         // Ganti "fonts/your_tile_font.ttf" dengan jalur font yang Anda inginkan
         // Anda bisa mencoba "fonts/pixel_font.ttf" yang sudah ada jika ingin font berbeda dari UI
@@ -557,9 +562,11 @@ public class GameScreen extends ScreenAdapter {
 
                     if (!player.isAlive() && player.getHealth() <=0) { // Cek apakah player mati setelah serangan musuh
                         player.setState(GameEntity.CharacterState.DYING);
+                        playerDeathSound.play(0.25f);
                         currentBattleState = BattleState.PLAYER_DYING_ANIMATION;
                     } else {
                         player.setState(GameEntity.CharacterState.HIT);
+                        playerHitSound.play(0.25f);
                         currentBattleState = BattleState.PLAYER_HIT_ANIMATION;
                     }
                 }
@@ -662,11 +669,14 @@ public class GameScreen extends ScreenAdapter {
         if (stage != null) { // Tambahkan null check
             stage.dispose();
         }
-        if (skin != null) { // Tambahkan null check
-            skin.dispose();
-        }
+//        if (skin != null) { // Tambahkan null check
+//            skin.dispose();
+//        }
         if (tileFont != null) {
             tileFont.dispose();
+        }
+        if (backgroundMusic != null){
+            backgroundMusic.dispose();
         }
     }
 }
