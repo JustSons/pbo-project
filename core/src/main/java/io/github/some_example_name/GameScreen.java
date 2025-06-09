@@ -120,6 +120,9 @@ public class GameScreen extends ScreenAdapter {
         player.equipWeapon(new BasicSword()); // Set initial weapon
 
         currentEnemy = new Goblin("characters/goblin/");
+        enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_hit.mp3"));
+        enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_attack.mp3"));
+        enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
 
         defaultTileTextureRegion = game.getTileTextureRegion();
 
@@ -136,24 +139,6 @@ public class GameScreen extends ScreenAdapter {
         playerDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/death.wav")); //
         playerAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/player_attack.mp3"));
 
-        // tiap enemy sfxnya blm tentu sama
-        if (currentEnemy instanceof Goblin) {
-            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_hit.mp3"));
-            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_attack.mp3"));
-            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
-        } else if (currentEnemy instanceof Ogre) {
-            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/ogre/ogre_hit.mp3"));
-            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/ogre/ogre_attack.mp3"));
-            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
-        } else if (currentEnemy instanceof Dragon) {
-            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/dragon/dragon_hit.mp3"));
-            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/dragon/dragon_attack.mp3"));
-            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
-        } else if (currentEnemy instanceof Wizard) {
-            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_hit.mp3"));
-            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_attack.mp3"));
-            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_death.mp3"));
-        }
 
         // --- BARU: Inisialisasi tileFont ---
         // Ganti "fonts/your_tile_font.ttf" dengan jalur font yang Anda inginkan
@@ -649,6 +634,9 @@ public class GameScreen extends ScreenAdapter {
                     }
 
                     currentEnemy.dispose(); // Hapus musuh lama sepenuhnya
+                    enemyAttackSound.dispose();
+                    enemyDeathSound.dispose();
+                    enemyHitSound.dispose();
 
                     // --- Logika SPESIFIK untuk Kemenangan Wizard atau Spawn Musuh Biasa ---
                     if (isWizardDefeated) {
@@ -676,6 +664,24 @@ public class GameScreen extends ScreenAdapter {
                         }
                         System.out.println("New enemy spawned: " + currentEnemy.getClass().getSimpleName());
                         currentEnemy.setState(GameEntity.CharacterState.IDLE);
+                        // tiap enemy sfxnya blm tentu sama
+                        if (currentEnemy instanceof Goblin) {
+                            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_hit.mp3"));
+                            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_attack.mp3"));
+                            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
+                        } else if (currentEnemy instanceof Ogre) {
+                            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/ogre/ogre_hit.mp3"));
+                            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/ogre/ogre_attack.mp3"));
+                            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
+                        } else if (currentEnemy instanceof Dragon) {
+                            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/dragon/dragon_hit.mp3"));
+                            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/dragon/dragon_attack.mp3"));
+                            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
+                        } else if (currentEnemy instanceof Wizard) {
+                            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_hit.mp3"));
+                            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_attack.mp3"));
+                            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_death.mp3"));
+                        }
 
 //                    gameBoard.replaceUsedTiles(selectedTiles);
 //                    List<String> solutions = gameBoard.findAllValidWords();
