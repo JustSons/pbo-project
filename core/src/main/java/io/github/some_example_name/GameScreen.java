@@ -85,6 +85,7 @@ public class GameScreen extends ScreenAdapter {
     private Music backgroundMusic;
     private Sound playerHitSound; // BARU: Sound effect ketika player terkena hit
     private Sound playerDeathSound;
+    private Sound playerAttackSound;
 
     private float progress = 0f;
 
@@ -131,6 +132,7 @@ public class GameScreen extends ScreenAdapter {
 
         playerHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/player_hit.wav")); // BARU: Muat sound effect
         playerDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/death.wav")); //
+        playerAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/player_attack.mp3"));
         // --- BARU: Inisialisasi tileFont ---
         // Ganti "fonts/your_tile_font.ttf" dengan jalur font yang Anda inginkan
         // Anda bisa mencoba "fonts/pixel_font.ttf" yang sudah ada jika ingin font berbeda dari UI
@@ -406,6 +408,7 @@ public class GameScreen extends ScreenAdapter {
             player.setState(GameEntity.CharacterState.ATTACKING);
             currentEnemy.setState(GameEntity.CharacterState.IDLE); // Pastikan musuh dalam keadaan idle
             // stateTimer = 0f; // stateTime diupdate otomatis di GameEntity.update()
+            playerAttackSound.play(0.25f);
         } else {
             System.out.println("Invalid word: " + currentWord + ". Try again!");
             resetWordSelection();
