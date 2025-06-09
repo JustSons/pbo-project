@@ -38,7 +38,7 @@ import io.github.some_example_name.utils.WordDictionary;
 import io.github.some_example_name.utils.GameBoard;
 import io.github.some_example_name.items.potions.HealthPotion; // BARU: Import HealthPotion
 import io.github.some_example_name.items.Item; // BARU: Import kelas Item
-
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane; // BARU: Import ScrollPane
 import java.util.List;
 import java.util.Collections;
 
@@ -74,6 +74,7 @@ public class GameScreen extends ScreenAdapter {
     private boolean isBackpackOpen = false; // BARU: State untuk backpack
     private com.badlogic.gdx.scenes.scene2d.ui.Window backpackWindow; // BARU: Jendela backpack
     private com.badlogic.gdx.scenes.scene2d.ui.Table inventoryTable; // BARU: Tabel di dalam jendela
+    private ScrollPane inventoryScrollPane;
     private BitmapFont tileFont;
 
     private float enemyX;
@@ -237,8 +238,14 @@ public class GameScreen extends ScreenAdapter {
         stage.addActor(backpackWindow);
 
         inventoryTable = new com.badlogic.gdx.scenes.scene2d.ui.Table(skin);
-        inventoryTable.setFillParent(true); // Mengisi seluruh jendela
-        backpackWindow.add(inventoryTable).expand().fill(); // Tambahkan tabel ke jendela
+//        inventoryTable.setFillParent(true); // Mengisi seluruh jendela
+        // BARU: Buat ScrollPane dan bungkus inventoryTable di dalamnya
+        inventoryScrollPane = new ScrollPane(inventoryTable, skin);
+        inventoryScrollPane.setFadeScrollBars(false); // Agar scrollbar selalu terlihat
+        inventoryScrollPane.setScrollingDisabled(true, false); // Hanya scroll vertikal
+
+        // Tambahkan ScrollPane ke backpackWindow, bukan inventoryTable langsung
+        backpackWindow.add(inventoryScrollPane).expand().fill().row(); // Penting: .row() setelahnya
 
         // Tambahkan tombol Close ke jendela backpack
         TextButton closeBackpackButton = new TextButton("Close", skin);
@@ -248,7 +255,6 @@ public class GameScreen extends ScreenAdapter {
                 closeBackpack();
             }
         });
-        backpackWindow.row(); // Baris baru
         backpackWindow.add(closeBackpackButton).width(80).height(30).padBottom(10).center(); // Tambahkan tombol close
 
         // Gdx.input.setInputProcessor(new com.badlogic.gdx.InputMultiplexer(stage, new TileInputProcessor(this))); // Tetap seperti ini
