@@ -89,21 +89,30 @@ public class GameBoard {
 
                 float chance = MathUtils.random.nextFloat();
                 float greenblue = MathUtils.random.nextFloat();
-                if (chance < 0.05f) { // 5% kemungkinan GemTile
-                    // Jika ini adalah slot GemTile, maka hurufnya HARUS dari set langka
+                if (MathUtils.random.nextFloat() < 0.05f) { // Misalnya 5% kemungkinan huruf langka
                     letterForTile = getRandomRareLetterForGem();
-                    if (greenblue < 0.5f) {
-                        tileGrid[r][c] = new GemTile(letterForTile, "Blue", 2, tileX, tileY, tileSize, tileSize);
-                    }else {
-                        tileGrid[r][c] = new GemTile(letterForTile, "Green", 2, tileX, tileY, tileSize, tileSize);
-                    }
-                } else if (chance < 0.15f) { // 10% kemungkinan FireTile (0.05 + 0.10)
-                    // FireTile bisa berupa huruf umum
+                } else {
                     letterForTile = WordDictionary.getRandomCommonLetter().charAt(0);
+                }
+
+                // Kemudian, tentukan jenis tile berdasarkan huruf yang dipilih
+                boolean isRareLetter = false;
+                for (char rareChar : RARE_LETTERS_FOR_GEM) {
+                    if (letterForTile == rareChar) {
+                        isRareLetter = true;
+                        break;
+                    }
+                }
+
+                if (isRareLetter) {
+                    // Jika hurufnya langka, SELALU jadi GemTile
+                    String gemColor = (MathUtils.random.nextFloat() < 0.5f) ? "Blue" : "Green"; // Pilih warna gem
+                    tileGrid[r][c] = new GemTile(letterForTile, gemColor, 2, tileX, tileY, tileSize, tileSize);
+                } else if (chance < 0.10f) { // Jika bukan huruf langka, ada 10% kemungkinan FireTile
+                    // FireTile bisa berupa huruf umum
                     tileGrid[r][c] = new FireTile(letterForTile, tileX, tileY, tileSize, tileSize);
                 } else { // Sisanya BasicLetterTile
                     // BasicLetterTile bisa berupa huruf umum
-                    letterForTile = WordDictionary.getRandomCommonLetter().charAt(0);
                     tileGrid[r][c] = new BasicLetterTile(letterForTile, tileX, tileY, tileSize, tileSize);
                 }
             }

@@ -29,15 +29,13 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import io.github.some_example_name.entities.GameEntity;
 import io.github.some_example_name.entities.Player;
 import io.github.some_example_name.entities.enemies.*;
+import io.github.some_example_name.items.weapons.*;
 import io.github.some_example_name.tiles.Tile;
 import io.github.some_example_name.effects.tile.TileEffect;
 import io.github.some_example_name.effects.tile.BonusDamageEffect;
 import io.github.some_example_name.utils.WordCalculator;
 import io.github.some_example_name.utils.WordDictionary;
 import io.github.some_example_name.utils.GameBoard;
-import io.github.some_example_name.items.weapons.BasicSword;
-import io.github.some_example_name.items.weapons.MagicStaff; // BARU: Import MagicStaff
-import io.github.some_example_name.items.weapons.Weapon; // BARU: Import Weapon (untuk random weapon)
 import io.github.some_example_name.items.potions.HealthPotion; // BARU: Import HealthPotion
 import io.github.some_example_name.items.Item; // BARU: Import kelas Item
 
@@ -589,19 +587,29 @@ public class GameScreen extends ScreenAdapter {
                     progress += 0.05f;
 
                     // Drop item (HealthPotion atau Weapon)
-                    if (MathUtils.random.nextFloat() < 0.3f) {
+                    if (MathUtils.random.nextFloat() < 0.4f) {
                         HealthPotion newPotion = new HealthPotion();
                         player.addHealthPotion(newPotion);
                         System.out.println("You found a Health Potion!");
                     }
-                    if (MathUtils.random.nextFloat() < 0.05f) {
+                    if (MathUtils.random.nextFloat() < 0.15f) {
                         Weapon droppedWeapon;
-                        if (MathUtils.random.nextFloat() < 0.5f) {
-                            droppedWeapon = new BasicSword();
-                            System.out.println("You found a new weapon: Basic Sword!");
-                        } else {
+                        float weaponchance = MathUtils.random.nextFloat();
+                        if (weaponchance < 0.01f) {
                             droppedWeapon = new MagicStaff();
-                            System.out.println("You found a new weapon: Magic Staff!");
+                            System.out.println("You found a new weapon: Mr. Alby's Chosen One!");
+                        } else if(weaponchance < 0.1f){
+                            droppedWeapon = new LegendarySword();
+                            System.out.println("You found a new weapon: Legendary Sword!");
+                        } else if (weaponchance < 0.3f) {
+                            droppedWeapon = new EpicSword();
+                            System.out.println("You found a new weapon: Epic Sword!");
+                        }else if (weaponchance < 0.5f) {
+                            droppedWeapon = new RareSword();
+                            System.out.println("You found a new weapon: Rare Sword!");
+                        }else {
+                            droppedWeapon = new CommonSword();
+                            System.out.println("You found a new weapon: Common Sword!");
                         }
                         player.addItem(droppedWeapon);
                     }
