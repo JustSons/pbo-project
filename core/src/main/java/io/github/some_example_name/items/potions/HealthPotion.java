@@ -8,7 +8,7 @@ public class HealthPotion extends Item {
 
     public HealthPotion() {
         super("Health Potion", "items/health_potion.png");
-        this.healAmount = 30;
+        this.healAmount = 50;
         System.out.println("Health Potion created.");
     }
 
