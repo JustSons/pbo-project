@@ -85,6 +85,10 @@ public class GameScreen extends ScreenAdapter {
     private Sound playerDeathSound;
     private Sound playerAttackSound;
 
+    private Sound enemyHitSound;
+    private Sound enemyDeathSound;
+    private Sound enemyAttackSound;
+
     private float progress = 0f;
 
     private enum BattleState {
@@ -131,6 +135,26 @@ public class GameScreen extends ScreenAdapter {
         playerHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/player_hit.wav")); // BARU: Muat sound effect
         playerDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/death.wav")); //
         playerAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/player/player_attack.mp3"));
+
+        // tiap enemy sfxnya blm tentu sama
+        if (currentEnemy instanceof Goblin) {
+            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_hit.mp3"));
+            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_attack.mp3"));
+            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
+        } else if (currentEnemy instanceof Ogre) {
+            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/ogre/ogre_hit.mp3"));
+            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/ogre/ogre_attack.mp3"));
+            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
+        } else if (currentEnemy instanceof Dragon) {
+            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/dragon/dragon_hit.mp3"));
+            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/dragon/dragon_attack.mp3"));
+            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/goblin/goblin_death.mp3"));
+        } else if (currentEnemy instanceof Wizard) {
+            enemyHitSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_hit.mp3"));
+            enemyAttackSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_attack.mp3"));
+            enemyDeathSound = Gdx.audio.newSound(Gdx.files.internal("characters/wizard/wizard_death.mp3"));
+        }
+
         // --- BARU: Inisialisasi tileFont ---
         // Ganti "fonts/your_tile_font.ttf" dengan jalur font yang Anda inginkan
         // Anda bisa mencoba "fonts/pixel_font.ttf" yang sudah ada jika ingin font berbeda dari UI
@@ -526,9 +550,11 @@ public class GameScreen extends ScreenAdapter {
                     if (!currentEnemy.isAlive() && currentEnemy.getHealth() <=0) { // Cek apakah musuh mati setelah serangan
                         currentEnemy.setState(GameEntity.CharacterState.DYING);
                         currentBattleState = BattleState.ENEMY_DYING_ANIMATION;
+                        enemyDeathSound.play(0.25f);
                     } else {
                         currentEnemy.setState(GameEntity.CharacterState.HIT);
                         currentBattleState = BattleState.ENEMY_HIT_ANIMATION;
+                        enemyHitSound.play(0.25f);
                     }
                 }
                 break;
@@ -550,6 +576,11 @@ public class GameScreen extends ScreenAdapter {
                     // Jika musuh tidak mati, musuh menyerang balik
                     currentBattleState = BattleState.ENEMY_TURN_ATTACK_ANIMATION;
                     currentEnemy.setState(GameEntity.CharacterState.ATTACKING);
+                    if (currentEnemy instanceof Wizard){
+                        enemyAttackSound.play(0.5f); // sfx wizard attack agak kecil
+                    } else {
+                        enemyAttackSound.play(0.255f);
+                    }
                     player.setState(GameEntity.CharacterState.IDLE);
                 }
                 break;
