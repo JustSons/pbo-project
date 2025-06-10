@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Array;
 
 import io.github.some_example_name.interfaces.Attackable;
 import io.github.some_example_name.interfaces.Renderable;
-import io.github.some_example_name.effects.status.StatusEffect; // Import StatusEffect
 
 public abstract class GameEntity implements Attackable, Renderable {
     public enum CharacterState {
@@ -24,7 +23,6 @@ public abstract class GameEntity implements Attackable, Renderable {
     // HAPUS: protected Texture texture; // Ini untuk gambar statis, akan diganti dengan animasi
     protected float x, y; // Posisi di layar
 
-    protected Array<StatusEffect> activeEffects;
 
     // --- BARU: Untuk Animasi ---
     protected Animation<TextureRegion> idleAnimation;
@@ -51,7 +49,6 @@ public abstract class GameEntity implements Attackable, Renderable {
         this.maxHealth = maxHealth;
         this.health = maxHealth;
         this.attackPower = attackPower;
-        this.activeEffects = new Array<>();
 
         this.displayWidth = displayWidth;
         this.displayHeight = displayHeight;
@@ -240,28 +237,9 @@ public abstract class GameEntity implements Attackable, Renderable {
             currentPlayingAnimation.isAnimationFinished(stateTime)) {
             setState(CharacterState.IDLE);
         }
-
-        updateEffects(delta);
     }
 
-    public void updateEffects(float delta) {
-        Array<StatusEffect> effectsToRemove = new Array<>();
-        for (StatusEffect effect : activeEffects) {
-            effect.update(this, delta);
-            if (effect.isFinished()) {
-                effectsToRemove.add(effect);
-            }
-        }
-        for (StatusEffect effect : effectsToRemove) {
-            effect.remove(this);
-            activeEffects.removeValue(effect, true);
-        }
-    }
 
-    public void addStatusEffect(StatusEffect effect) {
-        activeEffects.add(effect);
-        effect.apply(this);
-    }
 
     @Override
     public void dispose() {
