@@ -340,6 +340,10 @@ public class GameScreen extends ScreenAdapter {
     }
 
     public void handleTileClick(Tile clickedTile) {
+        if (currentBattleState != BattleState.PLAYER_INPUT) {
+            // Jangan izinkan pemilihan tile jika bukan dalam state PLAYER_INPUT
+            return;
+        }
         if (selectedTiles.size == 0) {
             selectedTiles.add(clickedTile);
             currentWord += clickedTile.getLetter();
@@ -640,9 +644,9 @@ public class GameScreen extends ScreenAdapter {
                     }
 
                     currentEnemy.dispose(); // Hapus musuh lama sepenuhnya
-                    enemyAttackSound.dispose();
-                    enemyDeathSound.dispose();
-                    enemyHitSound.dispose();
+                    if (enemyAttackSound != null) enemyAttackSound.dispose();
+                    if (enemyDeathSound != null) enemyDeathSound.dispose();
+                    if (enemyHitSound != null) enemyHitSound.dispose();
 
                     // --- Logika SPESIFIK untuk Kemenangan Wizard atau Spawn Musuh Biasa ---
                     if (isWizardDefeated) {
