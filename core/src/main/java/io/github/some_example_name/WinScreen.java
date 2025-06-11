@@ -83,7 +83,7 @@ public class WinScreen extends ScreenAdapter {
         batch.begin();
 
         game.font.setColor(Color.YELLOW); // Mengubah warna font menjadi kuning
-        winLayout.setText(game.font, "YOU GOT THRE RESURRECTION STONE!"); // Mengubah teks pesan
+        winLayout.setText(game.font, "YOU GOT THE RESURRECTION STONE!"); // Mengubah teks pesan
         game.font.draw(batch, winLayout, (stage.getWidth() - winLayout.width) / 2, stage.getHeight() / 2 + 150);
 
         game.font.setColor(Color.WHITE);

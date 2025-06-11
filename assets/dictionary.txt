@@ -2665,6 +2665,7 @@ dui
 duke
 dumb
 dump
+dunk
 duncan
 duo
 duplicate
@@ -3171,6 +3172,7 @@ farmer
 farmers
 farming
 farms
+fart
 fascinating
 fashion
 fast
@@ -3325,6 +3327,8 @@ flashers
 flashing
 flat
 flavor
+flea
+flee
 fleece
 fleet
 flesh
@@ -3366,6 +3370,7 @@ focus
 focused
 focuses
 focusing
+foe
 fog
 fold
 folder
@@ -3490,6 +3495,7 @@ frost
 frozen
 fruit
 fruits
+fry
 ftp
 fuck
 fucked
@@ -3981,6 +3987,8 @@ hits
 hitting
 hiv
 hoax
+hoard
+hoe
 hobbies
 hobby
 hockey
@@ -4820,6 +4828,7 @@ lewis
 lexington
 lexmark
 lexus
+liar
 liabilities
 liability
 liable
@@ -5624,6 +5633,7 @@ newsletters
 newspaper
 newspapers
 newton
+newt
 next
 nextel
 niagara
@@ -6071,6 +6081,7 @@ pays
 pdas
 pdf
 pdt
+pea
 peace
 peaceful
 peak
@@ -6634,6 +6645,7 @@ provision
 provisions
 proxy
 prozac
+pry
 pst
 psychiatry
 psychological
@@ -6806,6 +6818,7 @@ reading
 readings
 reads
 ready
+reak
 real
 realistic
 reality
@@ -7185,6 +7198,7 @@ risks
 river
 rivers
 riverside
+rizz
 road
 roads
 roar
@@ -7234,6 +7248,7 @@ rose
 roses
 ross
 roster
+rot
 rotary
 rotation
 rouge
@@ -7257,6 +7272,7 @@ royal
 royalty
 rubber
 ruby
+rude
 rug
 rugby
 rugs
@@ -7751,9 +7767,12 @@ smtp
 snake
 snap
 snapshot
+snore
 snow
 snowboard
 soap
+sob
+sobbing
 soc
 soccer
 social
@@ -7915,6 +7934,7 @@ spy
 spyware
 sql
 squad
+squid
 square
 squirt
 squirting
@@ -9189,6 +9209,7 @@ what
 whatever
 whats
 wheat
+wheats
 wheel
 wheels
 when
@@ -9344,12 +9365,15 @@ yang
 yard
 yards
 yarn
+yap
+yapping
 yay
 yea
 yeah
 year
 yearly
 years
+yearn
 yeast
 yellow
 yemen
